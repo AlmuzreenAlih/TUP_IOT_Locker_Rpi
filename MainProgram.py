@@ -111,6 +111,25 @@ def MainLoop():
             tkShow(ctk,VideoFeed,"Video.png",0.9)
             Status_label.configure(text='Press "R" to retake picture.')
             Process = 0
+    elif Process == 2:
+        f = open("filename.txt", "r+")
+        reading = f.read()
+        f.close()
+        ###reading = SerialData.read().decode("utf-8")
+        if reading == 'A':
+            FingerPrintStatus.configure(text="Remove Finger")
+        elif reading == 'Y':
+            FingerPrintStatus.configure(text="Place your finger again")
+        elif reading == 'B':
+            FingerPrintStatus.configure(text="User Successfully registered")
+            app.after(3000, Success1)
+            return
+        elif reading == 'X':
+            FingerPrintStatus.configure(text="Try again")
+        elif reading == 'Z':
+            FingerPrintStatus.configure(text="Error Occured")
+            app.after(3000, Error1)
+        print(reading)
     app.after(5,MainLoop)
     
 GUI2 = ctk.CTkFrame(master=app, width=800, height=480, fg_color="transparent", corner_radius=0)
@@ -193,7 +212,7 @@ def Success1():
     ContactEntry.delete(0,-1)
     
 def Proceed_Button1_Func():
-    global Captured
+    global Captured, Process
     Name1 = Name1Entry.get()
     Name2 = Name2Entry.get()
     Name3 = Name3Entry.get()
@@ -209,8 +228,7 @@ def Proceed_Button1_Func():
         if ask == "yes":    
             ###SerialData.write(bytes(str(GetLeastAvailable()), "utf-8"))
             FingerPrintPanel.place(relx=0.5, rely=0.5, anchor="center")
-        
-    app.after(5, Loop2)
+            Process = 2
 
 Proceed_Button1 = ctk.CTkButton(master=GUI2, font=font1, text="SUBMIT", command=Proceed_Button1_Func, height=37, width=150,
                              fg_color="red", text_color=("white","black"), corner_radius=10,hover_color="orange")
