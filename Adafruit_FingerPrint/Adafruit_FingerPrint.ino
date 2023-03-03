@@ -10,15 +10,15 @@ SoftwareSerial mySerial(2, 3);
 #else
 // On Leonardo/M0/etc, others with hardware serial, use hardware serial!
 // #0 is green wire, #1 is white
-#define mySerial Serial1
+#define mySerial Serial3
 
 #endif
 
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
-
+int debug = 0;
 void setup() {
     Serial.begin(9600); while (!Serial); delay(100);
-    Serial.println("\n\nAdafruit finger detect test");
+    DBG("\n\nAdafruit finger detect test");
 
     finger.begin(57600); delay(5);
     if (finger.verifyPassword()) {
@@ -27,29 +27,42 @@ void setup() {
         Serial.println("Did not find fingerprint sensor :(");
         while (1) { delay(1); }
     }
-
-    Serial.println(F("Reading sensor parameters"));
+    Serial.println("Z");
     finger.getParameters();
-    Serial.print(F("Status: 0x")); Serial.println(finger.status_reg, HEX);
-    Serial.print(F("Sys ID: 0x")); Serial.println(finger.system_id, HEX);
-    Serial.print(F("Capacity: ")); Serial.println(finger.capacity);
-    Serial.print(F("Security level: ")); Serial.println(finger.security_level);
-    Serial.print(F("Device address: ")); Serial.println(finger.device_addr, HEX);
-    Serial.print(F("Packet len: ")); Serial.println(finger.packet_len);
-    Serial.print(F("Baud rate: ")); Serial.println(finger.baud_rate);
 
+    if (debug == 1) {
+        Serial.println(F("Reading sensor parameters"));
+        Serial.print(F("Status: 0x")); Serial.println(finger.status_reg, HEX);
+        Serial.print(F("Sys ID: 0x")); Serial.println(finger.system_id, HEX);
+        Serial.print(F("Capacity: ")); Serial.println(finger.capacity);
+        Serial.print(F("Security level: ")); Serial.println(finger.security_level);
+        Serial.print(F("Device address: ")); Serial.println(finger.device_addr, HEX);
+        Serial.print(F("Packet len: ")); Serial.println(finger.packet_len);
+        Serial.print(F("Baud rate: ")); Serial.println(finger.baud_rate);
+    }
     finger.getTemplateCount();
 
-    if (finger.templateCount == 0) {
-        Serial.print("Sensor doesn't contain any fingerprint data. Please run the 'enroll' example.");
-    } else {
-        Serial.println("Waiting for valid finger...");
-        Serial.print("Sensor contains "); Serial.print(finger.templateCount); Serial.println(" templates");
-    }
+    if (debug == 1) {
+        if (finger.templateCount == 0) {
+            Serial.print("Sensor doesn't contain any fingerprint data. Please run the 'enroll' example.");
+        } else {
+            Serial.println("Waiting for valid finger...");
+            Serial.print("Sensor contains "); Serial.print(finger.templateCount); Serial.println(" templates");
+        }
+    }   
 }
+uint8_t id;
 
 void loop() {
-    Serial.println(getFingerprintIDez()); delay(50);
+    //LOGIN: Fingerprint Wait
+    getFingerprintIDez(); delay(50);
+
+    //REGISTER: Serial Fingerprint ID to register
+    if (Serial.available()) {
+        id = Serial.parseInt(); delay(500);
+        getFingerprintEnroll();
+        while (Serial.available()) {Serial.read();}
+    }
 }
 
 uint8_t getFingerprintID() {
@@ -131,34 +144,33 @@ int getFingerprintIDez() {
     if (p != FINGERPRINT_OK)  return -1;
 
     // found a match!
-    Serial.print("Found ID #"); Serial.print(finger.fingerID);
-    Serial.print(" with confidence of "); Serial.println(finger.confidence);
+    // Serial.print("Found ID #"); 
+    Serial.print(finger.fingerID);
+    // Serial.print(" with confidence of "); Serial.println(finger.confidence);
     return finger.fingerID;
 }
 
-int debug = 1;
+// int debug = 1;
 void DBG(String str) {
     if (debug) {Serial.println(str);}
 }
 
-uint8_t readnumber(void) {
-  uint8_t num = 0;
+// // uint8_t readnumber(void) {
+// //   uint8_t num = 0;
 
-  while (num == 0) {
-    while (! Serial.available());
-    num = Serial.parseInt();
-  }
-  return num;
-}
+// //   while (num == 0) {
+// //     while (! Serial.available());
+// //     num = Serial.parseInt();
+// //   }
+// //   return num;
+// // }
 
-uint8_t id;
-
-void loop() {
-    if (Serial.available()) {
-        id = Serial.parseInt(); delay(500);
-        while (!getFingerprintEnroll());
-    }
-}
+// // void loop() {
+// //     if (Serial.available()) {
+// //         id = Serial.parseInt(); delay(500);
+// //         while (!getFingerprintEnroll());
+// //     }
+// // }
 
 uint8_t getFingerprintEnroll() {
     int p = -1;
@@ -181,7 +193,7 @@ uint8_t getFingerprintEnroll() {
             //     break;
             default:
                 // Serial.println("An Error");
-                Serial.println("X");
+                // Serial.println("X");
                 break;
         }
     }
@@ -241,14 +253,14 @@ uint8_t getFingerprintEnroll() {
             //     break;
             default:
                 // Serial.println("An Error");
-                Serial.println("X");
+                // Serial.println("X");
                 break;
         }
     }
 
   // OK success!
 
-  p = finger.image2Tz(2);
+    p = finger.image2Tz(2);
     switch (p) {
         case FINGERPRINT_OK:
             // Serial.println("Image converted");

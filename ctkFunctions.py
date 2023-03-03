@@ -11,3 +11,25 @@ def tkPack(Widget):
 
 def tkHide(Widget):
     Widget.place_forget()
+    
+import shutil
+import os
+
+def copy(file_path, to_folder, renamed=None):
+    # Check if the file exists
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"{file_path} does not exist.")
+
+    # Create the destination folder if it doesn't exist
+    os.makedirs(to_folder, exist_ok=True)
+
+    # Get the base name of the file (i.e. the file name without the path)
+    if renamed is None:
+        file_name = os.path.basename(file_path)
+    else:
+        file_name = renamed
+
+    # Copy the file to the destination folder
+    shutil.copy2(file_path, os.path.join(to_folder, file_name))
+
+    print(f"{file_path} copied to {os.path.join(to_folder, file_name)}.")
