@@ -58,9 +58,11 @@ class DB_UpdaterC:
         self.ToAdd = []
         self.stmt = ""
 
-def DB_Selector(db, table, WHERE, ID):
+def DB_Selector(db, table, WHERE, ID, additional=None):
     cur = db.cursor()
     stmt = "SELECT * FROM " + table + " WHERE " + WHERE + " = " + str(ID) + ";"
+    if additional is not None:
+        stmt = stmt[0:-1] + " " + additional + ";"
     print(stmt)
     cur.execute(stmt)
     rows = cur.fetchall()

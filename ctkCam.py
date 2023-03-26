@@ -1,6 +1,6 @@
 import customtkinter as ctk
 import cv2
-import ImportantFunctions as IF
+from ctkFunctions import *
 
 ctk.set_appearance_mode("light")  # Modes: system (default), light, dark
 ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
@@ -14,7 +14,7 @@ cap = cv2.VideoCapture(0)
 def MainLoop():
     _, capt = cap.read()
     cv2.imwrite("Video.png", capt)
-    IF.tkShow(ctk,VideoFeed,"Video.png",0.5)
+    tkRender(ctk,VideoFeed,"Video.png",0.5)
     app.after(5,MainLoop)
 
 Form1 = ctk.CTkFrame(master=app, width=800, height=480, fg_color="transparent", corner_radius=0)
@@ -22,7 +22,7 @@ Form1.place(relx=0.5, rely=0.5, anchor="center")
 
 VideoFeed = ctk.CTkLabel(master=Form1, text="")
 VideoFeed.place(relx=0.5, rely=0.5, anchor="center")
-IF.tkShow(ctk,VideoFeed, "Video.png",0.5)
+# tkRender(ctk,VideoFeed, "Video.png",0.5)
 
 def button_function():
     pass
